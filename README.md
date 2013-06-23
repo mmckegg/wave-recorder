@@ -21,12 +21,6 @@ navigator.webkitGetUserMedia({audio:true}, function(stream) {
   // get the mic input
   var audioInput = audioContext.createMediaStreamSource(stream)
 
-  // hacks for Web Audio API bugs - something must be connected to destination
-  var zeroGain = audioContext.createGainNode()
-  zeroGain.gain.value = 0.0
-  audioInput.connect( zeroGain )
-  zeroGain.connect( audioContext.destination )
-
   var recorder = WaveRecorder(audioInput)
 
   var r = recorder.record('/test.wav', function(err, url){
