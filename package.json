@@ -1,0 +1,25 @@
+{
+  "name": "wave-recorder",
+  "version": "0.0.0",
+  "description": "Record WAVE using Web Audio API and persist with Web FileSystem API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmckegg/wave-recorder.git"
+  },
+  "keywords": [
+    "pcm",
+    "web audio",
+    "FileSystem API",
+    "browser",
+    "recorder"
+  ],
+  "author": "Matt McKegg",
+  "license": "MIT",
+  "dependencies": {
+    "wave-file-stream": "*"
+  }
+}
