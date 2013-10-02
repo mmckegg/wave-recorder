@@ -23,14 +23,11 @@ module.exports = function(source){
 
   recorder.record = function(filepath, callback){
     outstream = WaveFileStream(filepath, context.sampleRate)
-    return {
-      stop: function(){
-        outstream.end()
-        callback&&callback(null, outstream.url)
-        outstream = null
-      },
-      filePath: filepath
-    } 
+    return function(){
+      outstream.end()
+      callback&&callback(null, outstream.url)
+      outstream = null
+    }
   }
 
   source.connect(recorderNode)
