@@ -17,7 +17,7 @@ module.exports = function(source){
     if (!outstream) return
     outstream.write([
       e.inputBuffer.getChannelData(0),
-      e.inputBuffer.getChannelData(0)
+      e.inputBuffer.getChannelData(1)
     ])
   }
 
