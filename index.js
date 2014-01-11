@@ -1,38 +1,45 @@
-var WaveFileStream = require('wave-file-stream')
+var WaveStream = require('wav').Writer
+var util = require('util');
 
-module.exports = function(source){
+module.exports = WaveRecorder
 
-  var recorder = {}
+util.inherits(WaveRecorder, WaveStream);
 
-  var context = source.context
-
-  var bufferLen = 4096
-  var recorderNode = context.createJavaScriptNode(bufferLen, 2, 2)
-  var outstream = null
-
-  window.recorders = window.recorders || []
-  window.recorders.push(recorderNode)
-
-  recorderNode.onaudioprocess = function(e){
-    if (!outstream) return
-    outstream.write([
-      e.inputBuffer.getChannelData(0),
-      e.inputBuffer.getChannelData(1)
-    ])
+function WaveRecorder(audioContext, opt) {
+  if (!(this instanceof WaveRecorder)){
+    return new WaveRecorder(audioContext, opt)
   }
 
-  recorder.record = function(filepath, callback){
-    outstream = WaveFileStream(filepath, context.sampleRate)
-    return function(){
-      outstream.end()
-      callback&&callback(null, outstream.url)
-      outstream = null
+  WaveStream.call(this, {
+    sampleRate: audioContext.destination.sampleRate, 
+    bitDepth: 16,
+    channelCount: 2
+  })
+
+  var self = this
+  var bufferLength = opt && opt.bufferLength || 4096
+  this.input = audioContext.createJavaScriptNode(bufferLength, 2, 2)
+  this.input.onaudioprocess = function(e){
+    var data = [e.inputBuffer.getChannelData(0), e.inputBuffer.getChannelData(1)]
+    var buffer = new Buffer(data[0].length * 4)
+    for (var i=0;i<data[0].length;i++){
+      var offset = i * 4
+      write16BitPCM(buffer, offset, data[0][i])
+      write16BitPCM(buffer, offset + 2, data[1][i])
     }
+    self.write(buffer)
   }
 
-  source.connect(recorderNode)
-  recorderNode.connect(context.destination) //this should not be necessary
+  this.on('end', function(){
+    self.input.onaudioprocess = null
+    self.input = null
+  })
 
-  return recorder
+  // required to make data flow - shouldn't be neccesary
+  this.input.connect(audioContext.destination)
+}
 
+function write16BitPCM(output, offset, data){
+  var s = Math.max(-1, Math.min(1, data));
+  output.writeInt16LE(Math.floor(s < 0 ? s * 0x8000 : s * 0x7FFF), offset);
 }
