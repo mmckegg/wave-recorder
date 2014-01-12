@@ -1,6 +1,6 @@
 {
   "name": "wave-recorder",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Pipe Web Audio API nodes into 16bit PCM Wave files",
   "main": "index.js",
   "scripts": {
