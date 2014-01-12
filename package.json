@@ -20,6 +20,6 @@
   "author": "Matt McKegg",
   "license": "MIT",
   "dependencies": {
-    "wav": "~0.2.0"
+    "wav": "~0.1.2"
   }
 }
