@@ -15,7 +15,7 @@ $ npm install wave-recorder
 var fs = require('web-fs')
 var WaveRecorder = require('wave-recorder')
 
-var audioContext = new webkitAudioContext()
+var audioContext = new AudioContext()
 
 navigator.webkitGetUserMedia({audio:true}, function(stream) {
   
