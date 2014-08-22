@@ -18,7 +18,7 @@ function WaveRecorder(audioContext, opt) {
 
   var self = this
   var bufferLength = opt && opt.bufferLength || 4096
-  this.input = audioContext.createJavaScriptNode(bufferLength, 2, 2)
+  this.input = audioContext.createScriptProcessor(bufferLength, 2, 2)
   this.input.onaudioprocess = function(e){
     var data = [e.inputBuffer.getChannelData(0), e.inputBuffer.getChannelData(1)]
     var buffer = new Buffer(data[0].length * 4)
