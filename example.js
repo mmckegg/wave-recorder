@@ -1,22 +1,8 @@
-wave-recorder
-===
-
-Pipe Web Audio API nodes into 16bit PCM Wave files.
-
-## Install
-
-```bash
-$ npm install wave-recorder
-```
-
-## Example
-
-```js
-var WaveRecorder = require('wave-recorder')
+var WaveRecorder = require('./')
 var WebFS = require('web-fs')
 
-navigator.webkitPersistentStorage.requestQuota(1024*1024, function(grantedBytes) {
-  window.webkitRequestFileSystem(PERSISTENT, grantedBytes, onInit)
+navigator.webkitTemporaryStorage.requestQuota(1024*1024*8, function(grantedBytes) {
+  window.webkitRequestFileSystem(PERSISTENT, grantedBytes, onInit, onError)
 })
 
 function onInit(fileSystem){
@@ -27,7 +13,7 @@ function onInit(fileSystem){
     
     // get the mic input
     var audioInput = audioContext.createMediaStreamSource(stream)
-    var recorder = WaveRecorder(audioContext, {channels: 2})
+    var recorder = WaveRecorder(audioContext, {channels: 1})
 
     audioInput.connect(recorder.input)
 
@@ -37,15 +23,31 @@ function onInit(fileSystem){
 
     // optionally go back and rewrite header with updated length
     recorder.on('header', function(header){ 
+
       fs.write(filePath, header, 0, header.length, 0, function(err){
-        // done!
+        fs.readFile('test.wav', 'entry', function(err, entry){
+          // play the file
+          play(entry.toURL())
+        })
       })
+
     })
 
-    // record for 10 seconds then stop
+    // record for 5 seconds then stop
     setTimeout(function(){
       recorder.end()
     }, 10000)
-  })
+
+  }, onError)
 }
-```
+
+function onError(err){
+  throw err
+}
+
+function play(url){
+  var player = document.createElement('audio')
+  player.src = url
+  player.autoplay = true
+  document.body.appendChild(player)
+}

@@ -4,7 +4,8 @@
   "description": "Pipe Web Audio API nodes into 16bit PCM Wave files",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "example": "beefy example.js"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,9 @@
   "license": "MIT",
   "dependencies": {
     "wav": "~0.1.2"
+  },
+  "devDependencies": {
+    "beefy": "^2.1.1",
+    "web-fs": "^1.2.0"
   }
 }

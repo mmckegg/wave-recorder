@@ -1,5 +1,6 @@
-var WaveStream = require('wav').Writer
-var util = require('util');
+var WaveStream = require('wav/lib/writer')
+var Buffer = require('buffer').Buffer
+var util = require('util')
 
 module.exports = WaveRecorder
 
@@ -10,22 +11,30 @@ function WaveRecorder(audioContext, opt) {
     return new WaveRecorder(audioContext, opt)
   }
 
+  var opt = opt || {}
+  opt.channels = opt.channels || 2
+
   WaveStream.call(this, {
     sampleRate: audioContext.destination.sampleRate, 
     bitDepth: 16,
-    channelCount: 2
+    channels: opt.channels
   })
 
   var self = this
   var bufferLength = opt && opt.bufferLength || 4096
-  this.input = audioContext.createScriptProcessor(bufferLength, 2, 2)
+  var bytesPerChannel = 16 / 8
+  var bytesPerFrame = bytesPerChannel * opt.channels
+
+  this.input = audioContext.createScriptProcessor(bufferLength, opt.channels, 1)
   this.input.onaudioprocess = function(e){
-    var data = [e.inputBuffer.getChannelData(0), e.inputBuffer.getChannelData(1)]
-    var buffer = new Buffer(data[0].length * 4)
-    for (var i=0;i<data[0].length;i++){
-      var offset = i * 4
-      write16BitPCM(buffer, offset, data[0][i])
-      write16BitPCM(buffer, offset + 2, data[1][i])
+    var buffer = new Buffer(e.inputBuffer.length * bytesPerFrame)
+    for (var c=0;c<e.inputBuffer.numberOfChannels;c++){
+      var channel = e.inputBuffer.getChannelData(c)
+      var channelOffset = c * bytesPerChannel
+      for (var i=0;i<channel.length;i++){
+        var offset = i * bytesPerFrame + channelOffset
+        write16BitPCM(buffer, offset, channel[i])
+      }
     }
     self.write(buffer)
   }
@@ -35,11 +44,11 @@ function WaveRecorder(audioContext, opt) {
     self.input = null
   })
 
-  // required to make data flow - shouldn't be neccesary
+  // required to make data flow, will be 0
   this.input.connect(audioContext.destination)
 }
 
 function write16BitPCM(output, offset, data){
-  var s = Math.max(-1, Math.min(1, data));
-  output.writeInt16LE(Math.floor(s < 0 ? s * 0x8000 : s * 0x7FFF), offset);
+  var s = Math.max(-1, Math.min(1, data))
+  output.writeInt16LE(Math.floor(s < 0 ? s * 0x8000 : s * 0x7FFF), offset)
 }
