@@ -1,7 +1,7 @@
 {
   "name": "wave-recorder",
   "version": "1.1.0",
-  "description": "Pipe Web Audio API nodes into 16bit PCM Wave files",
+  "description": "Pipe Web Audio API nodes into PCM Wave files",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

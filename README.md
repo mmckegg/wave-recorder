@@ -1,13 +1,36 @@
 wave-recorder
 ===
 
-Pipe Web Audio API nodes into 16bit PCM Wave files.
+Pipe Web Audio API nodes into PCM Wave files.
 
 ## Install
 
 ```bash
 $ npm install wave-recorder
 ```
+
+## API
+
+```js
+var WaveRecorder = require('wave-recorder')
+```
+
+### `var recorder = WaveRecorder(options)`
+
+Returns a stream. Pipe the stream to a file (you can use [web-fs](https://github.com/mmckegg/web-fs) or something similar).
+
+#### options:
+  - **`channels`**: (defaults to `2`)
+  - **`bitDepth`**: can be `16` or `32` (defaults to `32`) 
+  - **`silenceDuration`**: (optional) Specify the maximum duration (in seconds) of silence to record before pausing. Disabled if `0`.
+
+### `recorder.input` (AudioNode)
+
+Connect the audio you want to record to this node.
+
+### `recorder.on('header', func)`
+
+Called on every write with a new header containing an updated file length. You can write this to the start of the file, or ignore (most decoders can handle it, just the duration may appear incorrect).
 
 ## Example
 
@@ -27,7 +50,12 @@ function onInit(fileSystem){
     
     // get the mic input
     var audioInput = audioContext.createMediaStreamSource(stream)
-    var recorder = WaveRecorder(audioContext, {channels: 2})
+
+    // create the recorder instance
+    var recorder = WaveRecorder(audioContext, {
+      channels: 2,
+      bitDepth: 32
+    })
 
     audioInput.connect(recorder.input)
 
