@@ -14,12 +14,17 @@ function WaveRecorder(audioContext, opt) {
   var opt = opt || {}
   opt.channels = opt.channels || 2
   opt.bitDepth = opt.bitDepth || 32
+  opt.useWorker = opt.useWorker || false
 
   if (opt.bitDepth !== 32 && opt.bitDepth !== 16){
     throw new Error('bitDepth must be either 16 or 32')
   }
 
   var silentFor = 0
+
+  if (opt.startSilent && opt.silenceDuration) {
+    silentFor = opt.silenceDuration
+  }
 
   WaveStream.call(this, {
     sampleRate: audioContext.sampleRate, 
