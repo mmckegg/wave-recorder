@@ -14,7 +14,6 @@ function WaveRecorder(audioContext, opt) {
   var opt = opt || {}
   opt.channels = opt.channels || 2
   opt.bitDepth = opt.bitDepth || 32
-  opt.useWorker = opt.useWorker || false
 
   if (opt.bitDepth !== 32 && opt.bitDepth !== 16){
     throw new Error('bitDepth must be either 16 or 32')
@@ -34,7 +33,10 @@ function WaveRecorder(audioContext, opt) {
   })
 
   var self = this
-  var bufferLength = opt.bufferLength || 4096
+  var bufferLength = opt.bufferLength || 8192
+  var chunkLength = opt.chunkLength || 256
+
+  var recordLength = 8192
 
   var bytesPerChannel = opt.bitDepth / 8
   var bytesPerFrame = bytesPerChannel * opt.channels
@@ -42,10 +44,37 @@ function WaveRecorder(audioContext, opt) {
   this.input = audioContext.createScriptProcessor(bufferLength, opt.channels, 1)
 
   this.input.onaudioprocess = function(e){
+    var slices = e.inputBuffer.length / chunkLength
+    for (var i = 0; i < slices; i++) {
+      var data = []
+      var start = i * chunkLength
+      var end = (i + 1) * chunkLength
+      for (var c = 0; c < opt.channels; c++) {
+        data.push(e.inputBuffer.getChannelData(c).subarray(start, end))
+      }
+      enqueue(data)
+    }
+  }
+
+  var chunkId = 0
+  var queue = []
+  var processing = false
+
+  function enqueue(data) {
+    queue.push(data)
+    if (!processing) {
+      processing = true
+      process.nextTick(nextChunk)
+    }
+  }
+
+  function nextChunk () {
+    var data = queue.shift()
+
     var isSilent = true
-    var buffer = new Buffer(e.inputBuffer.length * bytesPerFrame)
-    for (var c=0;c<e.inputBuffer.numberOfChannels;c++){
-      var channel = e.inputBuffer.getChannelData(c)
+    var buffer = new Buffer(data[0].length * bytesPerFrame)
+    for (var c=0;c<opt.channels;c++){
+      var channel = data[c]
       var channelOffset = c * bytesPerChannel
       for (var i=0;i<channel.length;i++){
         var offset = i * bytesPerFrame + channelOffset
@@ -63,14 +92,25 @@ function WaveRecorder(audioContext, opt) {
     }
 
     if (isSilent){
-      silentFor += e.inputBuffer.duration
+      silentFor += data[0].length * audioContext.sampleRate
     } else {
       silentFor = 0
     }
 
     if (!isSilent || !opt.silenceDuration || opt.silenceDuration > silentFor){
       self.write(buffer)
-      self._emitHeader()
+      self.emit('chunk', chunkId, true)
+    } else {
+      self.emit('chunk', chunkId, false)
+    }
+
+    chunkId += 1
+
+    if (queue.length) {
+      processing = true
+      process.nextTick(nextChunk)
+    } else {
+      processing = false
     }
   }
 
