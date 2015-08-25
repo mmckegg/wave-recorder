@@ -128,15 +128,6 @@ function write16BitPCM(output, offset, data){
   output.writeInt16LE(Math.floor(s < 0 ? s * 0x8000 : s * 0x7FFF), offset)
 }
 
-WaveRecorder.prototype._emitHeader = function () {
-  var dataLength = this.bytesProcessed
-  var headerLength = this.headerLength
-  var header = this._header
-  header['writeUInt32' + this.endianness](dataLength + headerLength - 8, 4)
-  header['writeUInt32' + this.endianness](dataLength, headerLength - 4)
-  this.emit('header', header)
-}
-
 function hasSignal(value){
   return value > 0.0001 || value < -0.0001
 }
