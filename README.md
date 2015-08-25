@@ -65,9 +65,13 @@ function onInit(fileSystem){
 
     // optionally go back and rewrite header with updated length
     recorder.on('header', function(header){ 
-      fs.write(filePath, header, 0, header.length, 0, function(err){
-        // done!
+      var headerStream = fs.createWriteStream(path, {
+        start: 0,
+        flags: 'r+'
       })
+
+      headerStream.write(header)
+      headerStream.end()
     })
 
     // record for 10 seconds then stop
