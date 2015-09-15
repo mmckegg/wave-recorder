@@ -92,7 +92,7 @@ function WaveRecorder(audioContext, opt) {
     }
 
     if (isSilent){
-      silentFor += data[0].length * audioContext.sampleRate
+      silentFor += data[0].length / audioContext.sampleRate
     } else {
       silentFor = 0
     }
