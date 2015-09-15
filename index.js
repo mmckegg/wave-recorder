@@ -43,7 +43,7 @@ function WaveRecorder(audioContext, opt) {
 
   this.input = audioContext.createScriptProcessor(bufferLength, opt.channels, 1)
 
-  this.input.onaudioprocess = function(e){
+  this.input.onaudioprocess = function (e) {
     var slices = e.inputBuffer.length / chunkLength
     for (var i = 0; i < slices; i++) {
       var data = []
@@ -60,7 +60,7 @@ function WaveRecorder(audioContext, opt) {
   var queue = []
   var processing = false
 
-  function enqueue(data) {
+  function enqueue (data) {
     queue.push(data)
     if (!processing) {
       processing = true
@@ -97,7 +97,7 @@ function WaveRecorder(audioContext, opt) {
       silentFor = 0
     }
 
-    if (!isSilent || !opt.silenceDuration || opt.silenceDuration > silentFor){
+    if (!isSilent || !opt.silenceDuration || opt.silenceDuration > silentFor) {
       self.write(buffer)
       self.emit('chunk', chunkId, true)
     } else {
