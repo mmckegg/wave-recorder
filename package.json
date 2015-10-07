@@ -21,7 +21,9 @@
   "author": "Matt McKegg",
   "license": "MIT",
   "dependencies": {
-    "wav": "~0.1.2"
+    "audio-buffer-stream": "~1.0.0",
+    "wav": "~0.1.2",
+    "xtend": "^4.0.0"
   },
   "devDependencies": {
     "beefy": "^2.1.1",
